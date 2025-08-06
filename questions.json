@@ -1,0 +1,93 @@
+{
+    "Human Resources Management": [
+      {
+        "question": "Considering the factor affecting recruitment, which one of the following given alternative is not a part of internal factors?",
+        "options": [
+          "Socio economic factors",
+          "Companies’ growth rate",
+          "Companies pay package",
+          "Role of trade unions"
+        ],
+        "correctAnswer": 0,
+        "explanation": "Socio-economic factors are external, not internal to the organization."
+      },
+      {
+        "question": "The personal manager acts as a ________ in case of friction between two employees, group of employees, superiors, subordinates and employees, and with the sole objective of maintaining industrial harmony.",
+        "options": [
+          "Coordinator",
+          "Employees champion",
+          "Mediator",
+          "Trainer"
+        ],
+        "correctAnswer": 2,
+        "explanation": "A mediator resolves conflicts and promotes harmony."
+      },
+      {
+        "question": "________ decisions are taken by line manager after matching the recruitment of a job with the qualification of candidates.",
+        "options": [
+          "Induction",
+          "Placement",
+          "Orientation",
+          "Recruitment"
+        ],
+        "correctAnswer": 1,
+        "explanation": "Placement refers to assigning the right person to the right job."
+      },
+      {
+        "question": "________ is also considered as an extended work in sample. It incorporates individuals and group exercises designed to simulate the types of work which the candidate will be expected to do.",
+        "options": [
+          "Assessment Centre",
+          "Simulation test",
+          "Orientation",
+          "Placement"
+        ],
+        "correctAnswer": 0,
+        "explanation": "Assessment centers evaluate candidates through simulated work situations."
+      },
+      {
+        "question": "________ is an integrated system design to improve the efficiency with which HR data is compiled. It makes HR records more useful to management by serving as a source of information.",
+        "options": [
+          "Human resource audit",
+          "Human resource information system",
+          "Human resource accounting",
+          "Human resource research"
+        ],
+        "correctAnswer": 1,
+        "explanation": "HRIS systems help in storing and analyzing HR data efficiently."
+      },
+      {
+        "question": "Organizing tasks and responsibilities toward having the productive line and staff function unit of the work is called ________.",
+        "options": [
+          "Horizontal mobility",
+          "Job design",
+          "Job enrichment",
+          "Job rotation"
+        ],
+        "correctAnswer": 1,
+        "explanation": "Job design defines how tasks are structured and assigned."
+      },
+      {
+        "question": "Professional organization search for the most suitable candidate and advise the company regarding filling up the position. Head hunters are also called ________.",
+        "options": [
+          "Search consultant",
+          "Private agent",
+          "Professional hunter",
+          "Body shoppers"
+        ],
+        "correctAnswer": 0,
+        "explanation": "Head hunters are often referred to as search consultants."
+      },
+      {
+        "question": "Which among the following is the internal factor that affects recruitment?",
+        "options": [
+          "Socio-economic factor",
+          "Organisational culture",
+          "Supply and demand factors",
+          "Employment rate"
+        ],
+        "correctAnswer": 1,
+        "explanation": "Organisational culture is an internal factor influencing recruitment."
+      }
+    ]
+  }
+  
