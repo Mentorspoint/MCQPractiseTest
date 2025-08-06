@@ -87,6 +87,12 @@
       background: linear-gradient(135deg, #3db0ff 0%, #2a8ee8 100%);
     }
 
+    .subject-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
     #mcq-test {
       background: rgba(255, 255, 255, 0.98);
       border-radius: 20px;
@@ -340,6 +346,24 @@
       border-left: 4px solid #2a9fff;
     }
 
+    .error-message {
+      background: #f8d7da;
+      color: #721c24;
+      padding: 20px;
+      border-radius: 10px;
+      margin: 20px 0;
+      text-align: center;
+    }
+
+    .loading-message {
+      background: #d1ecf1;
+      color: #0c5460;
+      padding: 20px;
+      border-radius: 10px;
+      margin: 20px 0;
+      text-align: center;
+    }
+
     @media (max-width: 768px) {
       .container { padding: 10px; }
       header h1 { font-size: 2rem; }
@@ -361,8 +385,14 @@
     <section id="subject-selection">
       <h2>Choose Your Subject</h2>
       <p style="color: #666; margin-bottom: 20px;">Select a subject to begin your practice test</p>
-      <div class="subject-grid">
-        <button class="subject-btn" onclick="startTest('Cost Accounting')">📊 Cost Accounting</button>
+      <div id="loading-indicator" class="loading-message" style="display: none;">
+        Loading questions... Please wait.
+      </div>
+      <div id="error-indicator" class="error-message" style="display: none;">
+        Error loading questions. Please check if the questions.json file is available.
+      </div>
+      <div class="subject-grid" id="subject-grid">
+        <button class="subject-btn" onclick="startTest('Human Resources Management')">📊 Human Resources Management</button>
         <button class="subject-btn" onclick="startTest('Marketing Management')">📈 Marketing Management</button>
         <button class="subject-btn" onclick="startTest('ESBM')">🏢 ESBM</button>
         <button class="subject-btn" onclick="startTest('Income Tax')">💰 Income Tax</button>
@@ -375,7 +405,7 @@
     <section id="mcq-test">
       <div class="test-header">
         <h2 id="subject-title"></h2>
-        <p id="question-counter">Question 1 of 20</p>
+        <p id="question-counter">Question 1 of 25</p>
         <div class="progress-bar">
           <div class="progress-fill" id="progress-fill"></div>
         </div>
@@ -406,7 +436,7 @@
       
       <div class="results-stats">
         <div class="stat-card">
-          <div class="stat-number" id="total-questions">20</div>
+          <div class="stat-number" id="total-questions">0</div>
           <div class="stat-label">Total Questions</div>
         </div>
         <div class="stat-card">
@@ -444,101 +474,69 @@
     let currentQuestionIndex = 0;
     let selectedSubject = "";
     let userAnswers = [];
-    let totalQuestions = 20;
+    let totalQuestions = 0;
     let testQuestions = [];
+    let questionBank = {};
+    let questionsLoaded = false;
 
-    const questionBank = {
-      'Cost Accounting': [
-        {
-          question: "What is the primary purpose of cost accounting?",
-          options: ["To determine selling prices", "To control and reduce costs", "To prepare financial statements", "To calculate taxes"],
-          correctAnswer: 1,
-          explanation: "Cost accounting primarily focuses on controlling and reducing costs to improve business efficiency."
-        },
-        {
-          question: "Which of the following is a direct cost?",
-          options: ["Factory rent", "Raw materials", "Supervisor salary", "Utilities"],
-          correctAnswer: 1,
-          explanation: "Raw materials can be directly traced to the production of specific products, making them direct costs."
-        },
-        {
-          question: "What is standard costing?",
-          options: ["Historical cost analysis", "Predetermined cost estimation", "Variable cost calculation", "Fixed cost allocation"],
-          correctAnswer: 1,
-          explanation: "Standard costing involves setting predetermined costs for comparison with actual costs."
-        }
-      ],
-      'Marketing Management': [
-        {
-          question: "What are the 4 Ps of marketing?",
-          options: ["Price, Place, Promotion, Product", "People, Process, Physical Evidence, Product", "Planning, Positioning, Pricing, Promotion", "Product, Profit, Place, Promotion"],
-          correctAnswer: 0,
-          explanation: "The 4 Ps of marketing are Product, Price, Place, and Promotion - the fundamental elements of the marketing mix."
-        },
-        {
-          question: "What is market segmentation?",
-          options: ["Dividing products into categories", "Dividing markets into distinct groups", "Setting different prices", "Creating promotional campaigns"],
-          correctAnswer: 1,
-          explanation: "Market segmentation involves dividing a market into distinct groups of consumers with similar needs or characteristics."
-        }
-      ],
-      'ESBM': [
-        {
-          question: "What does ESBM stand for?",
-          options: ["Economic and Social Business Management", "Environmental and Social Business Management", "Ethical and Sustainable Business Management", "Enterprise and Strategic Business Management"],
-          correctAnswer: 2,
-          explanation: "ESBM typically stands for Ethical and Sustainable Business Management, focusing on responsible business practices."
-        }
-      ],
-      'Income Tax': [
-        {
-          question: "What is taxable income?",
-          options: ["Total income", "Income after deductions", "Gross salary", "Investment returns"],
-          correctAnswer: 1,
-          explanation: "Taxable income is the total income minus allowable deductions and exemptions."
-        }
-      ],
-      'Banking': [
-        {
-          question: "What is the primary function of commercial banks?",
-          options: ["Issue currency", "Accept deposits and provide loans", "Regulate monetary policy", "Control inflation"],
-          correctAnswer: 1,
-          explanation: "Commercial banks primarily accept deposits from customers and provide loans to borrowers."
-        }
-      ],
-      'Fundamentals of Macro Economics': [
-        {
-          question: "What is GDP?",
-          options: ["Government Development Program", "Gross Domestic Product", "Global Development Policy", "General Domestic Pricing"],
-          correctAnswer: 1,
-          explanation: "GDP stands for Gross Domestic Product, measuring the total value of goods and services produced in a country."
-        }
-      ]
-    };
+    // Load questions from JSON file
+    function loadQuestions() {
+      const loadingIndicator = document.getElementById('loading-indicator');
+      const errorIndicator = document.getElementById('error-indicator');
+      const subjectButtons = document.querySelectorAll('.subject-btn');
+      
+      // Show loading indicator and disable buttons
+      loadingIndicator.style.display = 'block';
+      errorIndicator.style.display = 'none';
+      subjectButtons.forEach(btn => btn.disabled = true);
+
+      fetch('questions.json')
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then(data => {
+          questionBank = data;
+          questionsLoaded = true;
+          loadingIndicator.style.display = 'none';
+          subjectButtons.forEach(btn => btn.disabled = false);
+          console.log('Questions loaded successfully:', Object.keys(questionBank));
+        })
+        .catch(error => {
+          console.error('Error loading questions:', error);
+          loadingIndicator.style.display = 'none';
+          errorIndicator.style.display = 'block';
+          subjectButtons.forEach(btn => btn.disabled = true);
+        });
+    }
 
     function startTest(subject) {
+      if (!questionsLoaded) {
+        alert('Questions are still loading. Please wait a moment and try again.');
+        return;
+      }
+
       selectedSubject = subject;
       currentQuestionIndex = 0;
       userAnswers = [];
       
-      const subjectQuestions = questionBank[subject] || [];
-      testQuestions = [];
+      const subjectQuestions = questionBank[subject];
       
-      for (let i = 0; i < totalQuestions; i++) {
-        if (i < subjectQuestions.length) {
-          testQuestions.push(subjectQuestions[i]);
-        } else {
-          testQuestions.push({
-            question: `Sample ${subject} question ${i + 1}?`,
-            options: [`Option A for question ${i + 1}`, `Option B for question ${i + 1}`, `Option C for question ${i + 1}`, `Option D for question ${i + 1}`],
-            correctAnswer: Math.floor(Math.random() * 4),
-            explanation: `This is the explanation for sample question ${i + 1}.`
-          });
-        }
+      if (!subjectQuestions || subjectQuestions.length === 0) {
+        alert(`No questions found for ${subject}. Please check your questions.json file.`);
+        return;
       }
       
+      // Use all available questions or limit to a maximum
+      testQuestions = [...subjectQuestions];
+      totalQuestions = testQuestions.length;
+      
+      // Initialize user answers array
       userAnswers = new Array(totalQuestions).fill(-1);
       
+      // Show test interface
       document.getElementById('subject-selection').style.display = 'none';
       document.getElementById('mcq-test').style.display = 'block';
       document.getElementById('subject-title').textContent = subject;
@@ -680,7 +678,7 @@
             '<p><strong>Correct Answer:</strong> ' + correctAnswerText + '</p>' +
           '</div>' +
           '<div class="explanation">' +
-            '<strong>Explanation:</strong> ' + question.explanation +
+            '<strong>Explanation:</strong> ' + (question.explanation || 'No explanation provided.') +
           '</div>';
 
         reviewContent.appendChild(reviewQuestion);
@@ -703,6 +701,9 @@
       document.getElementById('review').style.display = 'none';
       document.getElementById('results').style.display = 'block';
     }
+
+    // Load questions when the page loads
+    window.addEventListener('DOMContentLoaded', loadQuestions);
   </script>
 </body>
 </html>
